@@ -34,6 +34,7 @@ public class TodoListActivity extends AppCompatActivity {
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if (event.getAction() == KeyEvent.ACTION_DOWN &&
                     keyCode == KeyEvent.KEYCODE_ENTER) {
+                    // add items to the end because older items are probably more important
                     todoItems.add(myEditText.getText().toString());
                     aa.notifyDataSetChanged();
                     myEditText.setText("");
