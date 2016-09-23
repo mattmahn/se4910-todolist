@@ -16,32 +16,5 @@ public class TodoListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_todo_list);
-
-        // get refs to UI elements
-        final EditText myEditText = (EditText) findViewById(R.id.myEditText);
-        final ListView myListView = (ListView) findViewById(R.id.myListView);
-
-        // connect adapter for displaying todo list items in ListView
-        final List<String> todoItems = new ArrayList<>();
-        final ArrayAdapter<String> aa = new ArrayAdapter<>(this,
-                                                           android.R.layout.simple_list_item_1,
-                                                           todoItems);
-        myListView.setAdapter(aa);
-
-        // let user add items to todo list
-        myEditText.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (event.getAction() == KeyEvent.ACTION_DOWN &&
-                    keyCode == KeyEvent.KEYCODE_ENTER) {
-                    // add items to the end because older items are probably more important
-                    todoItems.add(myEditText.getText().toString());
-                    aa.notifyDataSetChanged();
-                    myEditText.setText("");
-                    return true;
-                }
-                return false;
-            }
-        });
     }
 }
