@@ -6,10 +6,16 @@
     android:orientation="vertical"
     tools:context="com.mahnke.todolist.TodoListActivity">
 
-    <fragment
-        android:id="@+id/myListFragment"
-        android:name="com.mahnke.todolist.MyListFragment"
+    <Button
+        android:id="@+id/secondActivityButton"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:layout="@layout/fragment_list"/>
+        android:layout_height="wrap_content"
+        android:text="Display Second Activity"/>
+
+    <!--<fragment-->
+        <!--android:id="@+id/myListFragment"-->
+        <!--android:name="com.mahnke.todolist.MyListFragment"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--tools:layout="@layout/fragment_list"/>-->
 </LinearLayout>
