@@ -3,7 +3,13 @@ package com.mahnke.todolist;
 
 import android.app.Fragment;
 import android.app.ListFragment;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +20,12 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+
+import static android.app.Activity.RESULT_OK;
+import static android.content.Context.NOTIFICATION_SERVICE;
+import static com.mahnke.todolist.TodoListActivity.SPEECH_REQUEST_CODE;
 
 
 /**
@@ -23,7 +34,9 @@ import java.util.List;
 public class MyListFragment extends ListFragment
         implements AdapterView.OnItemClickListener {
 
-    private final List<String> todoItems;
+    private static final int NOTIF_TASK_DUE = 18;
+    private final List<TodoItem> todoItems;
+    private ArrayAdapter<TodoItem> aa;
 
     public MyListFragment() {
         // Required empty public constructor
@@ -51,7 +64,8 @@ public class MyListFragment extends ListFragment
      */
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Toast.makeText(getActivity(), this.todoItems.get(position), Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), this.todoItems.get(position).toString(), Toast.LENGTH_SHORT)
+             .show();
     }
 
     /**
@@ -65,11 +79,10 @@ public class MyListFragment extends ListFragment
         super.onViewCreated(view, savedInstanceState);
         // get refs to UI elements
         final EditText myEditText = (EditText) view.findViewById(R.id.myEditText);
-
         // connect adapter for displaying todo list items in ListView
-        final ArrayAdapter<String> aa = new ArrayAdapter<>(getActivity(),
-                                                           android.R.layout.simple_list_item_1,
-                                                           todoItems);
+        aa = new ArrayAdapter<>(getActivity(),
+                                android.R.layout.simple_list_item_1,
+                                todoItems);
         setListAdapter(aa);
         getListView().setOnItemClickListener(this);
 
@@ -80,13 +93,38 @@ public class MyListFragment extends ListFragment
                 if (event.getAction() == KeyEvent.ACTION_DOWN &&
                     keyCode == KeyEvent.KEYCODE_ENTER) {
                     // add items to the end because older items are probably more important
-                    todoItems.add(myEditText.getText().toString());
-                    aa.notifyDataSetChanged();
+                    Calendar soon = Calendar.getInstance();
+                    soon.add(Calendar.MINUTE, 1);
+                    TodoItem todoItem = new TodoItem(soon, myEditText.getText().toString(), true);
+                    addTodoItem(todoItem);
+                    makeNotification(todoItem);
                     myEditText.setText("");
                     return true;
                 }
                 return false;
             }
         });
+    }
+
+    private void addTodoItem(TodoItem todoItem) {
+        todoItems.add(todoItem);
+        aa.notifyDataSetChanged();
+    }
+
+    private void makeNotification(TodoItem todoItem) {
+        Intent intent = new Intent(getActivity(), MyListFragment.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(getActivity(), 0, intent, 0);
+        // build notification
+        Notification n = new Notification.Builder(getActivity())
+                .setContentTitle(getString(R.string.app_name))
+                .setContentText(todoItem.getTitle())
+                .setContentIntent(pendingIntent)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setAutoCancel(true)
+                .build();
+
+        NotificationManager notificationManager =
+                (NotificationManager) getActivity().getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(NOTIF_TASK_DUE, n);
     }
 }
