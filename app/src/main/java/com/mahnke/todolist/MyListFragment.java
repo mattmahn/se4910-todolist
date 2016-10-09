@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -75,7 +76,7 @@ public class MyListFragment extends ListFragment
      * @param savedInstanceState
      */
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(final View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         // get refs to UI elements
         final EditText myEditText = (EditText) view.findViewById(R.id.myEditText);
@@ -104,6 +105,38 @@ public class MyListFragment extends ListFragment
                 return false;
             }
         });
+        final Button btnVoice = (Button) view.findViewById(R.id.voiceInput);
+        btnVoice.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                displaySpeechRecognizer(v);
+            }
+        });
+    }
+
+    /**
+     * Create an intent that starts the Speech Recognizer activity
+     */
+    public void displaySpeechRecognizer(View view) {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        // start the activity, the intent will be populated with text
+        startActivityForResult(intent, SPEECH_REQUEST_CODE);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.v(MyListFragment.class.getName(), "in #onActivityResult");
+        if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK) {
+            List<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+            Log.v(MyListFragment.class.getName(), results.toString());
+            String spokenText = results.get(0);
+
+            TodoItem todoItem = new TodoItem(spokenText, true);
+            addTodoItem(todoItem);
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     private void addTodoItem(TodoItem todoItem) {
