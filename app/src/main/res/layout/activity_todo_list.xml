@@ -1,21 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="com.mahnke.todolist.TodoListActivity">
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:paddingBottom="@dimen/activity_vertical_margin"
+              android:paddingLeft="@dimen/activity_horizontal_margin"
+              android:paddingRight="@dimen/activity_horizontal_margin"
+              android:paddingTop="@dimen/activity_vertical_margin"
+              tools:context="com.mahnke.todolist.TodoListActivity">
 
-    <Button
-        android:id="@+id/secondActivityButton"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Display Second Activity"/>
+        android:orientation="horizontal"
+        style="?android:buttonBarStyle">
 
-    <!--<fragment-->
-        <!--android:id="@+id/myListFragment"-->
-        <!--android:name="com.mahnke.todolist.MyListFragment"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--tools:layout="@layout/fragment_list"/>-->
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="showTimePickerDialog"
+            android:text="@string/pick_time"
+            style="?android:buttonBarButtonStyle"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="showDatePickerDialog"
+            android:text="@string/pick_date"
+            style="?android:buttonBarButtonStyle"/>
+    </LinearLayout>
+
+    <fragment
+        android:id="@+id/myListFragment"
+        android:name="com.mahnke.todolist.MyListFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout="@layout/fragment_list"/>
 </LinearLayout>
