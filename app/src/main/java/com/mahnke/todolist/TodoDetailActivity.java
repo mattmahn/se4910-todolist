@@ -106,6 +106,7 @@ public class TodoDetailActivity extends AppCompatActivity
         } else {
             setResult(RESULT_OK);
             finish();
+            Toast.makeText(this, "Task saved", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -122,6 +123,7 @@ public class TodoDetailActivity extends AppCompatActivity
 
         setResult(RESULT_OK);
         finish();
+        Toast.makeText(this, "Task deleted", Toast.LENGTH_SHORT).show();
     }
 
     public void setDate(View view) {

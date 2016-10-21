@@ -3,6 +3,17 @@
 This here app is a todo list app for the Mobile Application Development corse at
 MSOE (SE-4910). It is a basic implementation of to-do list app.
 
+
+## Features
+
+- [x] CRUD tasks in persistent database
+- [x] Auto complete summary entry
+- [ ] Set date and time for notifying of a task being due
+- [x] Set priority level of a task
+- [ ] Save and cancel tasks with a Toast
+- [ ] Ability to sort task list by date, priority, or status
+
+
 ## License
 
 This software is licensed under GNU General Public License v3.0.
