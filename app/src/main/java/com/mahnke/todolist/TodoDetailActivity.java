@@ -10,12 +10,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.FilterQueryProvider;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.mahnke.todolist.contentprovider.TodoContentProvider;
@@ -31,6 +34,8 @@ public class TodoDetailActivity extends AppCompatActivity
     private Button btnTime;
     private Button btnConfirm;
     private Button btnDelete;
+    private CheckBox chkStatus;
+    private Spinner spnrPriority;
     private Uri todoUri;
     private SimpleCursorAdapter cursorAdapter;
 
@@ -39,12 +44,15 @@ public class TodoDetailActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.todo_edit);
 
+        // set view components
         summaryText = (AutoCompleteTextView) findViewById(R.id.todo_edit_summary);
         descriptionText = (EditText) findViewById(R.id.todo_edit_description);
         btnDate = (Button) findViewById(R.id.pick_date);
         btnTime = (Button) findViewById(R.id.pick_time);
         btnConfirm = (Button) findViewById(R.id.todo_edit_confirm);
         btnDelete = (Button) findViewById(R.id.todo_edit_delete);
+        chkStatus = (CheckBox) findViewById(R.id.todo_edit_status);
+        spnrPriority = (Spinner) findViewById(R.id.todo_edit_priority);
 
         // setup autocomplete for summary
         cursorAdapter = new SimpleCursorAdapter(this,
@@ -135,7 +143,10 @@ public class TodoDetailActivity extends AppCompatActivity
     }
 
     private void fillData(Uri uri) {
-        String[] projection = {TodoDatabaseHelper.COL_SUMMARY, TodoDatabaseHelper.COL_DESCRIPTION};
+        String[] projection = {TodoDatabaseHelper.COL_SUMMARY,
+                               TodoDatabaseHelper.COL_DESCRIPTION,
+                               TodoDatabaseHelper.COL_STATUS,
+                               TodoDatabaseHelper.COL_PRIORITY};
         Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
 
         if (cursor != null) {
@@ -143,6 +154,12 @@ public class TodoDetailActivity extends AppCompatActivity
 
             summaryText.setText(cursor.getString(cursor.getColumnIndexOrThrow(TodoDatabaseHelper.COL_SUMMARY)));
             descriptionText.setText(cursor.getString(cursor.getColumnIndexOrThrow(TodoDatabaseHelper.COL_DESCRIPTION)));
+            chkStatus.setChecked(
+                    cursor.getInt(cursor.getColumnIndexOrThrow(TodoDatabaseHelper.COL_STATUS)) ==
+                    1);
+            int priorityIdx =
+                    cursor.getInt(cursor.getColumnIndexOrThrow(TodoDatabaseHelper.COL_PRIORITY));
+            spnrPriority.setSelection(priorityIdx);
 
             // always close the cursor
             cursor.close();
@@ -180,12 +197,15 @@ public class TodoDetailActivity extends AppCompatActivity
     private void saveState() {
         String summary = summaryText.getText().toString();
         String description = descriptionText.getText().toString();
+        boolean isComplete = chkStatus.isChecked();
 
         // only save if either summary or description is available
         if (!description.isEmpty() && !summary.isEmpty()) {
             ContentValues values = new ContentValues();
             values.put(TodoDatabaseHelper.COL_SUMMARY, summary);
             values.put(TodoDatabaseHelper.COL_DESCRIPTION, description);
+            values.put(TodoDatabaseHelper.COL_STATUS, isComplete ? 1 : 0);
+            values.put(TodoDatabaseHelper.COL_PRIORITY, spnrPriority.getSelectedItemPosition());
 
             if (todoUri == null) {
                 todoUri = getContentResolver().insert(TodoContentProvider.CONTENT_URI, values);

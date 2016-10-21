@@ -3,11 +3,14 @@ package com.mahnke.todolist;
 import java.util.Calendar;
 
 public class TodoItem {
+
+    private long id;
     private Calendar dueDate;
     private String summary;
     private String description;
-    private String priority;
+    private int priority;
     private boolean completed;
+    private long datetime;
 
     public TodoItem(String summary) {
         Calendar tomorrow = Calendar.getInstance();

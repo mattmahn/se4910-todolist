@@ -13,6 +13,9 @@ public class TodoDatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_DESCRIPTION = "description";
     public static final String COL_DATETIME = "datetime";
     public static final String COL_STATUS = "status";
+    public static final String COL_PRIORITY = "priority";
+    public static final String[] ALL_COLS =
+            {COL_ID, COL_SUMMARY, COL_DESCRIPTION, COL_DATETIME, COL_STATUS, COL_PRIORITY};
 
     private static final String DB_CREATE =
             "CREATE TABLE " + TABLE_TODO + "(" +
@@ -20,10 +23,11 @@ public class TodoDatabaseHelper extends SQLiteOpenHelper {
             COL_SUMMARY + " TEXT NOT NULL, " +
             COL_DESCRIPTION + " TEXT, " +
             COL_DATETIME + " TEXT, " +
-            COL_STATUS + " INTEGER" +
+            COL_STATUS + " INTEGER, " +
+            COL_PRIORITY + " INTEGER" +
             ");";
     private static final String DB_NAME = "todotable.db";
-    private static final int DB_VERSION = 6;
+    private static final int DB_VERSION = 8;
 
     public TodoDatabaseHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);

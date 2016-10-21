@@ -14,11 +14,11 @@
         android:orientation="horizontal">
 
         <Spinner
-            android:id="@+id/category"
+            android:id="@+id/todo_edit_priority"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:entries="@array/priorities"/>
+            android:entries="@array/todo_priorities"/>
 
         <Button
             android:id="@+id/pick_date"
