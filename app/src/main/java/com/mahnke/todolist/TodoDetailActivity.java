@@ -56,10 +56,6 @@ public class TodoDetailActivity extends AppCompatActivity
         cursorAdapter.setFilterQueryProvider(new FilterQueryProvider() {
             @Override
             public Cursor runQuery(CharSequence constraint) {
-                return getCursor(constraint);
-            }
-
-            private Cursor getCursor(CharSequence constraint) {
                 String select = TodoDatabaseHelper.COL_SUMMARY + " LIKE ? ";
                 String[] selectArgs = {"%" + constraint + "%"};
                 String[] summaryProjection =
@@ -87,7 +83,8 @@ public class TodoDetailActivity extends AppCompatActivity
                   null :
                   (Uri) savedInstanceState.getParcelable(TodoContentProvider.CONTENT_ITEM_TYPE);
         // or passed from other activity
-        if (extras != null && !extras.isEmpty()) { // TODO check
+        if (extras != null && !extras.isEmpty()) {
+            Log.v(this.getClass().getName(), "Loading the item from the database");
             todoUri = extras.getParcelable(TodoContentProvider.CONTENT_ITEM_TYPE);
             fillData(todoUri);
         }
@@ -95,7 +92,8 @@ public class TodoDetailActivity extends AppCompatActivity
 
     public void confirmEdit(View view) {
         Log.v(this.getClass().getName(), "Saving this todo item");
-        if (TextUtils.isEmpty(summaryText.getText().toString())) {
+        if (TextUtils.isEmpty(summaryText.getText().toString()) ||
+            TextUtils.isEmpty(descriptionText.getText().toString())) {
             makeToast();
         } else {
             setResult(RESULT_OK);
@@ -105,7 +103,14 @@ public class TodoDetailActivity extends AppCompatActivity
 
     public void delete(View view) {
         Log.v(this.getClass().getName(), "Deleting this todo item");
-//        getContentResolver().delete(todoUri, where, selection);
+        String summaryText = this.summaryText.getText().toString();
+        String descriptionText = this.descriptionText.getText().toString();
+
+        // TODO delete item where _id matches a (hidden) View in the layout, so the user can
+        // delete an item that they have edited
+        String where = TodoDatabaseHelper.COL_SUMMARY + " = ? AND " +
+                       TodoDatabaseHelper.COL_DESCRIPTION + " = ?";
+        getContentResolver().delete(todoUri, where, new String[]{summaryText, descriptionText});
 
         setResult(RESULT_OK);
         finish();
@@ -191,7 +196,9 @@ public class TodoDetailActivity extends AppCompatActivity
     }
 
     private void makeToast() {
-        Toast.makeText(TodoDetailActivity.this, "Please add a summary", Toast.LENGTH_LONG).show();
+        Toast.makeText(TodoDetailActivity.this,
+                       "Please add a summary and description",
+                       Toast.LENGTH_LONG).show();
     }
 
     /**
