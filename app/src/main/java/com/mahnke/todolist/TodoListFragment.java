@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.ListFragment;
 import android.app.LoaderManager;
-import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
@@ -22,18 +21,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.CheckBox;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
-import android.widget.TextView;
 
 import com.mahnke.todolist.contentprovider.TodoContentProvider;
 
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
-import static com.mahnke.todolist.TodoListActivity.SPEECH_REQUEST_CODE;
 
 
 public class TodoListFragment extends ListFragment
@@ -44,6 +40,7 @@ public class TodoListFragment extends ListFragment
     private static final int ACTIVITY_EDIT = 1;
     private static final int DELETE_ID = Menu.FIRST + 1;
     private static final int LOADER_ID = 545;
+    private static final int SPEECH_REQUEST_CODE = 276;
     private SimpleCursorAdapter adapter;
 
     public TodoListFragment() {
@@ -220,7 +217,9 @@ public class TodoListFragment extends ListFragment
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if (id == LOADER_ID) {
-            String[] projection = {TodoDatabaseHelper.COL_ID, TodoDatabaseHelper.COL_SUMMARY, TodoDatabaseHelper.COL_DESCRIPTION};
+            String[] projection = {TodoDatabaseHelper.COL_ID,
+                                   TodoDatabaseHelper.COL_SUMMARY,
+                                   TodoDatabaseHelper.COL_DESCRIPTION};
             return new CursorLoader(getActivity(),
                                     TodoContentProvider.CONTENT_URI,
                                     projection,
