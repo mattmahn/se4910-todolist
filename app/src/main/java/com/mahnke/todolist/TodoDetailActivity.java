@@ -10,9 +10,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.FilterQueryProvider;
+import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
 import com.mahnke.todolist.contentprovider.TodoContentProvider;
@@ -22,25 +25,61 @@ import java.util.Calendar;
 public class TodoDetailActivity extends AppCompatActivity
         implements DatePickerDialog.OnDateSetListener {
 
-    private EditText summaryText;
+    private AutoCompleteTextView summaryText;
     private EditText descriptionText;
     private Button btnDate;
     private Button btnTime;
     private Button btnConfirm;
     private Button btnDelete;
     private Uri todoUri;
+    private SimpleCursorAdapter cursorAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.todo_edit);
 
-        summaryText = (EditText) findViewById(R.id.todo_edit_summary);
+        summaryText = (AutoCompleteTextView) findViewById(R.id.todo_edit_summary);
         descriptionText = (EditText) findViewById(R.id.todo_edit_description);
         btnDate = (Button) findViewById(R.id.pick_date);
         btnTime = (Button) findViewById(R.id.pick_time);
         btnConfirm = (Button) findViewById(R.id.todo_edit_confirm);
         btnDelete = (Button) findViewById(R.id.todo_edit_delete);
+
+        // setup autocomplete for summary
+        cursorAdapter = new SimpleCursorAdapter(this,
+                                                android.R.layout.simple_list_item_1,
+                                                null,
+                                                new String[]{TodoDatabaseHelper.COL_SUMMARY},
+                                                new int[]{android.R.id.text1},
+                                                0);
+        cursorAdapter.setFilterQueryProvider(new FilterQueryProvider() {
+            @Override
+            public Cursor runQuery(CharSequence constraint) {
+                return getCursor(constraint);
+            }
+
+            private Cursor getCursor(CharSequence constraint) {
+                String select = TodoDatabaseHelper.COL_SUMMARY + " LIKE ? ";
+                String[] selectArgs = {"%" + constraint + "%"};
+                String[] summaryProjection =
+                        {TodoDatabaseHelper.COL_ID, TodoDatabaseHelper.COL_SUMMARY};
+                return getContentResolver().query(TodoContentProvider.CONTENT_URI,
+                                                  summaryProjection,
+                                                  select,
+                                                  selectArgs,
+                                                  null);
+            }
+        });
+        cursorAdapter.setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
+            @Override
+            public CharSequence convertToString(Cursor cursor) {
+                int index = cursor.getColumnIndex(TodoDatabaseHelper.COL_SUMMARY);
+                return cursor.getString(index);
+            }
+        });
+        summaryText.setAdapter(cursorAdapter);
+        // end setup autocomplete for summary
 
         Bundle extras = getIntent().getExtras();
         // check from saved instance

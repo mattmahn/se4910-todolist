@@ -36,10 +36,11 @@
     </LinearLayout>
 
 
-    <EditText
+    <AutoCompleteTextView
         android:id="@+id/todo_edit_summary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:completionThreshold="3"
         android:hint="@string/todo_edit_summary"
         android:imeOptions="actionNext"/>
 

@@ -23,7 +23,7 @@ public class TodoDatabaseHelper extends SQLiteOpenHelper {
             COL_STATUS + " INTEGER" +
             ");";
     private static final String DB_NAME = "todotable.db";
-    private static final int DB_VERSION = 5;
+    private static final int DB_VERSION = 6;
 
     public TodoDatabaseHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
