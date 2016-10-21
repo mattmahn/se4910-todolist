@@ -4,26 +4,26 @@ import java.util.Calendar;
 
 public class TodoItem {
     private Calendar dueDate;
-    private String title;
-    private boolean notify;
+    private String summary;
+    private String description;
+    private String priority;
+    private boolean completed;
 
-    public TodoItem(String title, boolean notify) {
+    public TodoItem(String summary) {
         Calendar tomorrow = Calendar.getInstance();
         tomorrow.add(Calendar.DAY_OF_MONTH, 1);
         this.dueDate = tomorrow;
-        this.title = title;
-        this.notify = notify;
+        this.summary = summary;
     }
 
-    public TodoItem(Calendar dueDate, String title, boolean notify) {
+    public TodoItem(Calendar dueDate, String summary) {
         this.dueDate = dueDate;
-        this.title = title;
-        this.notify = notify;
+        this.summary = summary;
     }
 
     @Override
     public String toString() {
-        return title;
+        return summary;
     }
 
     public Calendar getDueDate() {
@@ -34,19 +34,12 @@ public class TodoItem {
         this.dueDate = dueDate;
     }
 
-    public String getTitle() {
-        return title;
+    public String getSummary() {
+        return summary;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setSummary(String title) {
+        this.summary = title;
     }
 
-    public boolean isNotify() {
-        return notify;
-    }
-
-    public void setNotify(boolean notify) {
-        this.notify = notify;
-    }
 }
