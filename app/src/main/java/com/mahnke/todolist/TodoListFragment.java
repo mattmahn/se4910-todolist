@@ -24,6 +24,7 @@ import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Spinner;
 
 import com.mahnke.todolist.contentprovider.TodoContentProvider;
 
@@ -56,15 +57,27 @@ public class TodoListFragment extends ListFragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        fillData();
         return inflater.inflate(R.layout.fragment_list, container, false);
     }
 
     /* Activity & fragment instance have been created as well as their view hierarchy. */
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
+    public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        final Spinner spnrSort = (Spinner) getActivity().findViewById(R.id.sort_spinner);
+        spnrSort.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                getLoaderManager().restartLoader(LOADER_ID, null, TodoListFragment.this);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
         registerForContextMenu(getListView());
+        fillData();
     }
 
     /**
@@ -170,7 +183,7 @@ public class TodoListFragment extends ListFragment
             case DELETE_ID:
                 AdapterView.AdapterContextMenuInfo info =
                         (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-                Uri uri = Uri.parse(TodoContentProvider.CONTENT_TYPE + "/" + info.id);
+                Uri uri = Uri.parse(TodoContentProvider.CONTENT_URI + "/" + info.id);
                 getActivity().getContentResolver().delete(uri, null, null);
                 fillData();
                 retVal = true;
@@ -220,12 +233,26 @@ public class TodoListFragment extends ListFragment
             String[] projection = {TodoDatabaseHelper.COL_ID,
                                    TodoDatabaseHelper.COL_SUMMARY,
                                    TodoDatabaseHelper.COL_DESCRIPTION};
+            String orderBy = TodoDatabaseHelper.COL_DATETIME;
+            int selectedItemPosition =
+                    ((Spinner) getActivity().findViewById(R.id.sort_spinner)).getSelectedItemPosition();
+            switch (selectedItemPosition) { /* see res/values/sort_bys.xml */
+                case 0:
+                    orderBy = TodoDatabaseHelper.COL_DATETIME;
+                    break;
+                case 1:
+                    orderBy = TodoDatabaseHelper.COL_PRIORITY;
+                    break;
+                case 2:
+                    orderBy = TodoDatabaseHelper.COL_STATUS;
+                    break;
+            }
             return new CursorLoader(getActivity(),
                                     TodoContentProvider.CONTENT_URI,
                                     projection,
                                     null,
                                     null,
-                                    null);
+                                    orderBy);
         } else {
             return null;
         }

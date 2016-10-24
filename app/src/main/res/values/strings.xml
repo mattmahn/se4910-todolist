@@ -4,6 +4,7 @@
     <string name="no_todos">You have nothing to do!</string>
     <string name="menu_insert">Add todo</string>
     <string name="menu_delete">Delete todo</string>
+    <string name="sort_label">Sort by</string>
     <string name="todo_summary">Summary</string>
     <string name="todo_description">Description</string>
     <string name="todo_edit_summary">Summary</string>

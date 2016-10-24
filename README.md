@@ -11,7 +11,7 @@ at MSOE (SE-4910). It is a basic implementation of to-do list app.
 - [x] Set date and time for notifying of a task being due
 - [x] Set priority level of a task
 - [x] Save and cancel tasks with a Toast
-- [ ] Ability to sort task list by date, priority, or status
+- [x] Ability to sort task list by date, priority, or status
 - [ ] Open task detail view when opening a notification
 
 
