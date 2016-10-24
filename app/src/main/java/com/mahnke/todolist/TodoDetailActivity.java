@@ -1,7 +1,12 @@
 package com.mahnke.todolist;
 
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
+import android.app.TimePickerDialog;
 import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -10,7 +15,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -19,14 +23,16 @@ import android.widget.EditText;
 import android.widget.FilterQueryProvider;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.mahnke.todolist.contentprovider.TodoContentProvider;
 
+import java.io.UTFDataFormatException;
 import java.util.Calendar;
 
 public class TodoDetailActivity extends AppCompatActivity
-        implements DatePickerDialog.OnDateSetListener {
+        implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
 
     private AutoCompleteTextView summaryText;
     private EditText descriptionText;
@@ -38,6 +44,8 @@ public class TodoDetailActivity extends AppCompatActivity
     private Spinner spnrPriority;
     private Uri todoUri;
     private SimpleCursorAdapter cursorAdapter;
+
+    private Calendar dueDate = Calendar.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +93,20 @@ public class TodoDetailActivity extends AppCompatActivity
         summaryText.setAdapter(cursorAdapter);
         // end setup autocomplete for summary
 
+        // setup date & time pickers
+        btnDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new DatePickerFragment().show(getSupportFragmentManager(), "datePicker");
+            }
+        });
+        btnTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new TimePickerFragment().show(getSupportFragmentManager(), "timePicker");
+            }
+        });
+
         Bundle extras = getIntent().getExtras();
         // check from saved instance
         todoUri = (savedInstanceState == null) ?
@@ -106,6 +128,7 @@ public class TodoDetailActivity extends AppCompatActivity
         } else {
             setResult(RESULT_OK);
             finish();
+            scheduleTaskNotification();
             Toast.makeText(this, "Task saved", Toast.LENGTH_SHORT).show();
         }
     }
@@ -130,7 +153,6 @@ public class TodoDetailActivity extends AppCompatActivity
         Log.v(this.getClass().getName(), "Setting the date this todo item is due");
 
         // open DatePickerFragment
-        Calendar c = Calendar.getInstance();
         DialogFragment dialogFragment = new DatePickerFragment();
         dialogFragment.show(getSupportFragmentManager(), "datePicker");
     }
@@ -139,16 +161,12 @@ public class TodoDetailActivity extends AppCompatActivity
         Log.v(this.getClass().getName(), "Setting the time this todo item is due");
 
         // open TimePickerFragment
-        Calendar c = Calendar.getInstance();
         DialogFragment dialogFragment = new TimePickerFragment();
         dialogFragment.show(getSupportFragmentManager(), "timePicker");
     }
 
     private void fillData(Uri uri) {
-        String[] projection = {TodoDatabaseHelper.COL_SUMMARY,
-                               TodoDatabaseHelper.COL_DESCRIPTION,
-                               TodoDatabaseHelper.COL_STATUS,
-                               TodoDatabaseHelper.COL_PRIORITY};
+        String[] projection = TodoDatabaseHelper.ALL_COLS;
         Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
 
         if (cursor != null) {
@@ -162,6 +180,11 @@ public class TodoDetailActivity extends AppCompatActivity
             int priorityIdx =
                     cursor.getInt(cursor.getColumnIndexOrThrow(TodoDatabaseHelper.COL_PRIORITY));
             spnrPriority.setSelection(priorityIdx);
+            dueDate =
+                    Utils.getCalendarFromMillis(cursor.getLong(cursor.getColumnIndexOrThrow(
+                            TodoDatabaseHelper.COL_DATETIME)));
+            btnDate.setText(Utils.getPrettyDate(dueDate));
+            btnTime.setText(Utils.getPrettyTime(dueDate));
 
             // always close the cursor
             cursor.close();
@@ -208,7 +231,8 @@ public class TodoDetailActivity extends AppCompatActivity
             values.put(TodoDatabaseHelper.COL_DESCRIPTION, description);
             values.put(TodoDatabaseHelper.COL_STATUS, isComplete ? 1 : 0);
             values.put(TodoDatabaseHelper.COL_PRIORITY, spnrPriority.getSelectedItemPosition());
-
+            values.put(TodoDatabaseHelper.COL_DATETIME, dueDate.getTimeInMillis());
+            
             if (todoUri == null) {
                 todoUri = getContentResolver().insert(TodoContentProvider.CONTENT_URI, values);
             } else {
@@ -223,15 +247,38 @@ public class TodoDetailActivity extends AppCompatActivity
                        Toast.LENGTH_LONG).show();
     }
 
-    /**
-     * @param view        The view associated with this listener.
-     * @param year        The year that was set.
-     * @param monthOfYear The month that was set (0-11) for compatibility
-     *                    with {@link Calendar}.
-     * @param dayOfMonth  The day of the month that was set.
-     */
     @Override
     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
         Log.v(this.getClass().getName(), "In the callback from date picker");
+        this.dueDate.set(Calendar.YEAR, year);
+        this.dueDate.set(Calendar.MONTH, monthOfYear);
+        this.dueDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        btnDate.setText(Utils.getPrettyDate(this.dueDate));
+
+        // start time picker, for convenience
+        new TimePickerFragment().show(getSupportFragmentManager(), "timePicker");
+    }
+
+    @Override
+    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+        Log.v(this.getClass().getName(), "In the callback from time picker");
+        this.dueDate.set(Calendar.HOUR_OF_DAY, hourOfDay);
+        this.dueDate.set(Calendar.MINUTE, minute);
+        this.dueDate.set(Calendar.SECOND, 0);
+        btnTime.setText(Utils.getPrettyTime(this.dueDate));
+    }
+
+    private void scheduleTaskNotification() {
+        Log.v(this.getClass().getName(), "Scheduling a notification");
+        Intent i = new Intent(this, AlarmReceiver.class);
+        i.putExtra(TodoDatabaseHelper.COL_SUMMARY, summaryText.getText().toString());
+        i.putExtra(TodoDatabaseHelper.COL_DESCRIPTION, descriptionText.getText().toString());
+        i.setAction("com.mahnke.todolist.AlarmReceiver");
+
+        PendingIntent pIntent =
+                PendingIntent.getBroadcast(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, dueDate.getTimeInMillis(), pIntent);
     }
 }

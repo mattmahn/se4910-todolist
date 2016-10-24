@@ -6,13 +6,10 @@ import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
-import android.widget.TimePicker;
-import android.widget.Toast;
 
 import java.util.Calendar;
 
-public class TimePickerFragment extends DialogFragment
-        implements TimePickerDialog.OnTimeSetListener {
+public class TimePickerFragment extends DialogFragment {
 
     @NonNull
     @Override
@@ -21,11 +18,11 @@ public class TimePickerFragment extends DialogFragment
         final int hour = c.get(Calendar.HOUR_OF_DAY);
         final int minute = c.get(Calendar.MINUTE);
 
-        return new TimePickerDialog(getActivity(), this, hour, minute, true);
+        return new TimePickerDialog(getActivity(),
+                                    (TimePickerDialog.OnTimeSetListener) getActivity(),
+                                    hour,
+                                    minute,
+                                    true);
     }
 
-    @Override
-    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-        Toast.makeText(view.getContext(), hourOfDay + ":" + minute, Toast.LENGTH_SHORT).show();
-    }
 }
