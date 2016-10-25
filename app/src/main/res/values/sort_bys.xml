@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="sort_bys">
+        <item>Date</item>
+        <item>Priority</item>
+        <item>Status</item>
+    </string-array>
+</resources>
