@@ -12,7 +12,9 @@ at MSOE (SE-4910). It is a basic implementation of to-do list app.
 - [x] Set priority level of a task
 - [x] Save and cancel tasks with a Toast
 - [x] Ability to sort task list by date, priority, or status
+- [x] Access tasks via exported Content Provider
 - [ ] Open task detail view when opening a notification
+- [ ] Stylize tasks in list view to show their state (completion, priority)
 
 
 ## License
